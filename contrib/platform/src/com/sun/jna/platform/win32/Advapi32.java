@@ -15,6 +15,7 @@ package com.sun.jna.platform.win32;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.TypeMapper;
 import com.sun.jna.platform.win32.WinBase.SECURITY_ATTRIBUTES;
 import com.sun.jna.platform.win32.WinBase.STARTUPINFO;
 import com.sun.jna.platform.win32.WinBase.FE_EXPORT_FUNC;
@@ -34,7 +35,6 @@ import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
-
 import static com.sun.jna.platform.win32.WinDef.BOOLByReference;
 import static com.sun.jna.platform.win32.WinDef.DWORD;
 import static com.sun.jna.platform.win32.WinDef.DWORDByReference;
@@ -47,24 +47,35 @@ import static com.sun.jna.platform.win32.WinNT.PRIVILEGE_SET;
  *
  * @author dblock[at]dblock.org
  */
-public interface Advapi32 extends StdCallLibrary {
-	Advapi32 INSTANCE = Native.loadLibrary("Advapi32", Advapi32.class, W32APIOptions.DEFAULT_OPTIONS);
+public interface Advapi32 extends Winsvc, StdCallLibrary {
 
-	int MAX_KEY_LENGTH = 255;
-	int MAX_VALUE_NAME = 16383;
+    Advapi32 INSTANCE = Native.loadLibrary("Advapi32", Advapi32.class, W32APIOptions.DEFAULT_OPTIONS);
 
-	int RRF_RT_ANY = 0x0000ffff;
-	int RRF_RT_DWORD = 0x00000018;
-	int RRF_RT_QWORD = 0x00000048;
-	int RRF_RT_REG_BINARY = 0x00000008;
-	int RRF_RT_REG_DWORD = 0x00000010;
-	int RRF_RT_REG_EXPAND_SZ = 0x00000004;
-	int RRF_RT_REG_MULTI_SZ = 0x00000020;
-	int RRF_RT_REG_NONE = 0x00000001;
-	int RRF_RT_REG_QWORD = 0x00000040;
-	int RRF_RT_REG_SZ = 0x00000002;
+    int MAX_KEY_LENGTH = 255;
 
-	/**
+    int MAX_VALUE_NAME = 16383;
+
+    int RRF_RT_ANY = 0x0000ffff;
+
+    int RRF_RT_DWORD = 0x00000018;
+
+    int RRF_RT_QWORD = 0x00000048;
+
+    int RRF_RT_REG_BINARY = 0x00000008;
+
+    int RRF_RT_REG_DWORD = 0x00000010;
+
+    int RRF_RT_REG_EXPAND_SZ = 0x00000004;
+
+    int RRF_RT_REG_MULTI_SZ = 0x00000020;
+
+    int RRF_RT_REG_NONE = 0x00000001;
+
+    int RRF_RT_REG_QWORD = 0x00000040;
+
+    int RRF_RT_REG_SZ = 0x00000002;
+
+    /**
 	 * LOGON_WITH_PROFILE: 0x00000001<br>
 	 * Log on, then load the user profile in the HKEY_USERS registry key.<br>
 	 * The function returns after the profile is loaded. <br>
@@ -76,9 +87,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 * Windows XP: The profile is unloaded after the new process and all child
 	 * processes it has created are terminated.<br>
 	 */
-	int LOGON_WITH_PROFILE = 0x00000001;
+    int LOGON_WITH_PROFILE = 0x00000001;
 
-	/**
+    /**
 	 * LOGON_NETCREDENTIALS_ONLY: 0x00000002<br>
 	 * Log on, but use the specified credentials on the network only.<br>
 	 * The new process uses the same token as the caller, but the system creates
@@ -92,9 +103,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 * Therefore, the process can start, but it may not have access to network
 	 * resources.
 	 */
-	int LOGON_NETCREDENTIALS_ONLY = 0x00000002;
+    int LOGON_NETCREDENTIALS_ONLY = 0x00000002;
 
-	/**
+    /**
 	 * Retrieves the name of the user associated with the current thread.
 	 * http://msdn.microsoft.com/en-us/library/ms724432(VS.85).aspx
 	 *
@@ -106,9 +117,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            null character.
 	 * @return True if succeeded.
 	 */
-	boolean GetUserNameW(char[] buffer, IntByReference len);
+    boolean GetUserNameW(char[] buffer, IntByReference len);
 
-	/**
+    /**
 	 * Accepts the name of a system and anaccount as input and retrieves a
 	 * security identifier (SID) for the account and the name of the domain on
 	 * which the account was found.
@@ -139,11 +150,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            account when the function returns.
 	 * @return True if the function was successful, False otherwise.
 	 */
-	boolean LookupAccountName(String lpSystemName, String lpAccountName,
-			PSID Sid, IntByReference cbSid, char[] ReferencedDomainName,
-			IntByReference cchReferencedDomainName, PointerByReference peUse);
+    boolean LookupAccountName(String lpSystemName, String lpAccountName, PSID Sid, IntByReference cbSid, char[] ReferencedDomainName, IntByReference cchReferencedDomainName, PointerByReference peUse);
 
-	/**
+    /**
 	 * Retrieves the name of the account for this SID and the name of the first
 	 * domain on which this SID is found.
 	 *
@@ -176,11 +185,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, it returns zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean LookupAccountSid(String lpSystemName, PSID Sid,
-			char[] lpName, IntByReference cchName, char[] ReferencedDomainName,
-			IntByReference cchReferencedDomainName, PointerByReference peUse);
+    boolean LookupAccountSid(String lpSystemName, PSID Sid, char[] lpName, IntByReference cchName, char[] ReferencedDomainName, IntByReference cchReferencedDomainName, PointerByReference peUse);
 
-	/**
+    /**
 	 * Convert a security identifier (SID) to a string format suitable for
 	 * display, storage, or transmission.
 	 * http://msdn.microsoft.com/en-us/library/aa376399(VS.85).aspx
@@ -193,9 +200,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            the LocalFree function.
 	 * @return True if the function was successful, False otherwise.
 	 */
-	boolean ConvertSidToStringSid(PSID Sid, PointerByReference StringSid);
+    boolean ConvertSidToStringSid(PSID Sid, PointerByReference StringSid);
 
-	/**
+    /**
 	 * Convert a string-format security identifier (SID) into a valid,
 	 * functional SID.
 	 * http://msdn.microsoft.com/en-us/library/aa376402(VS.85).aspx
@@ -206,9 +213,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            Receives a pointer to the converted SID.
 	 * @return True if the function was successful, False otherwise.
 	 */
-	boolean ConvertStringSidToSid(String StringSid, PSIDByReference Sid);
+    boolean ConvertStringSidToSid(String StringSid, PSIDByReference Sid);
 
-	/**
+    /**
 	 * Returns the length, in bytes, of a valid security identifier (SID).
 	 * http://msdn.microsoft.com/en-us/library/aa446642(VS.85).aspx
 	 *
@@ -216,9 +223,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            A pointer to the SID structure whose length is returned.
 	 * @return Length of the SID.
 	 */
-	int GetLengthSid(PSID pSid);
+    int GetLengthSid(PSID pSid);
 
-	/**
+    /**
 	 * The IsValidSid function validates a security identifier (SID) by
 	 * verifying that the revision number is within a known range, and that the
 	 * number of subauthorities is less than the maximum.
@@ -231,9 +238,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         is no extended error information for this function; do not call
 	 *         GetLastError.
 	 */
-	boolean IsValidSid(PSID pSid);
+    boolean IsValidSid(PSID pSid);
 
-	/**
+    /**
 	 * Compares a SID to a well known SID and returns TRUE if they match.
 	 *
 	 * @param pSid
@@ -243,9 +250,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            the SID at pSid.
 	 * @return True if the SID is of a given well known type, false otherwise.
 	 */
-	boolean IsWellKnownSid(PSID pSid, int wellKnownSidType);
+    boolean IsWellKnownSid(PSID pSid, int wellKnownSidType);
 
-	/**
+    /**
 	 * The CreateWellKnownSid function creates a SID for predefined aliases.
 	 *
 	 * @param wellKnownSidType
@@ -265,10 +272,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. For extended error
 	 *         information, call GetLastError.
 	 */
-	boolean CreateWellKnownSid(int wellKnownSidType, PSID domainSid,
-			PSID pSid, IntByReference cbSid);
+    boolean CreateWellKnownSid(int wellKnownSidType, PSID domainSid, PSID pSid, IntByReference cbSid);
 
-	/**
+    /**
 	 * The LogonUser function attempts to log a user on to the local computer.
 	 * The local computer is the computer from which LogonUser was called. You
 	 * cannot use LogonUser to log on to a remote computer. You specify the user
@@ -305,11 +311,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, it returns zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean LogonUser(String lpszUsername, String lpszDomain,
-			String lpszPassword, int logonType, int logonProvider,
-			HANDLEByReference phToken);
+    boolean LogonUser(String lpszUsername, String lpszDomain, String lpszPassword, int logonType, int logonProvider, HANDLEByReference phToken);
 
-	/**
+    /**
 	 * The OpenThreadToken function opens the access token associated with a
 	 * thread.
 	 *
@@ -332,10 +336,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean OpenThreadToken(HANDLE ThreadHandle, int DesiredAccess,
-			boolean OpenAsSelf, HANDLEByReference TokenHandle);
+    boolean OpenThreadToken(HANDLE ThreadHandle, int DesiredAccess, boolean OpenAsSelf, HANDLEByReference TokenHandle);
 
-	/**
+    /**
 	 * The SetThreadToken function assigns an impersonation token to a thread.
 	 * The function can also cause a thread to stop using an impersonation token.
 	 * @param ThreadHandle [in, optional]
@@ -352,9 +355,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean SetThreadToken(HANDLEByReference ThreadHandle, HANDLE TokenHandle);
+    boolean SetThreadToken(HANDLEByReference ThreadHandle, HANDLE TokenHandle);
 
-	/**
+    /**
 	 * The OpenProcessToken function opens the access token associated with a
 	 * process.
 	 *
@@ -374,10 +377,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean OpenProcessToken(HANDLE ProcessHandle, int DesiredAccess,
-			HANDLEByReference TokenHandle);
+    boolean OpenProcessToken(HANDLE ProcessHandle, int DesiredAccess, HANDLEByReference TokenHandle);
 
-	/**
+    /**
 	 * The DuplicateToken function creates a new access token that duplicates
 	 * one already in existence.
 	 *
@@ -394,10 +396,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean DuplicateToken(HANDLE ExistingTokenHandle,
-			int ImpersonationLevel, HANDLEByReference DuplicateTokenHandle);
+    boolean DuplicateToken(HANDLE ExistingTokenHandle, int ImpersonationLevel, HANDLEByReference DuplicateTokenHandle);
 
-	/**
+    /**
 	 * The DuplicateTokenEx function creates a new access token that duplicates
 	 * an existing token. This function can create either a primary token or an
 	 * impersonation token.
@@ -424,11 +425,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         If the function fails, it returns zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean DuplicateTokenEx(HANDLE hExistingToken, int dwDesiredAccess,
-			WinBase.SECURITY_ATTRIBUTES lpTokenAttributes,
-			int ImpersonationLevel, int TokenType, HANDLEByReference phNewToken);
+    boolean DuplicateTokenEx(HANDLE hExistingToken, int dwDesiredAccess, WinBase.SECURITY_ATTRIBUTES lpTokenAttributes, int ImpersonationLevel, int TokenType, HANDLEByReference phNewToken);
 
-	/**
+    /**
 	 * Retrieves a specified type of information about an access token. The
 	 * calling process must have appropriate access rights to obtain the
 	 * information.
@@ -462,11 +461,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean GetTokenInformation(HANDLE tokenHandle,
-			int tokenInformationClass, Structure tokenInformation,
-			int tokenInformationLength, IntByReference returnLength);
+    boolean GetTokenInformation(HANDLE tokenHandle, int tokenInformationClass, Structure tokenInformation, int tokenInformationLength, IntByReference returnLength);
 
-	/**
+    /**
 	 * The ImpersonateLoggedOnUser function lets the calling thread impersonate
 	 * the security context of a logged-on user. The user is represented by a
 	 * token handle.
@@ -482,9 +479,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            TOKEN_IMPERSONATE access.
 	 * @return If the function succeeds, the return value is nonzero.
 	 */
-	boolean ImpersonateLoggedOnUser(HANDLE hToken);
+    boolean ImpersonateLoggedOnUser(HANDLE hToken);
 
-	/**
+    /**
 	 * The ImpersonateSelf function obtains an access token that impersonates
 	 * the security context of the calling process. The token is assigned to the
 	 * calling thread.
@@ -494,17 +491,17 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            supplies the impersonation level of the new token.
 	 * @return If the function succeeds, the return value is nonzero.
 	 */
-	boolean ImpersonateSelf(int ImpersonationLevel);
+    boolean ImpersonateSelf(int ImpersonationLevel);
 
-	/**
+    /**
 	 * The RevertToSelf function terminates the impersonation of a client
 	 * application.
 	 *
 	 * @return If the function succeeds, the return value is nonzero.
 	 */
-	boolean RevertToSelf();
+    boolean RevertToSelf();
 
-	/**
+    /**
 	 * The RegOpenKeyEx function opens the specified registry key. Note that key
 	 * names are not case sensitive.
 	 *
@@ -528,10 +525,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegOpenKeyEx(HKEY hKey, String lpSubKey, int ulOptions,
-			int samDesired, HKEYByReference phkResult);
+    int RegOpenKeyEx(HKEY hKey, String lpSubKey, int ulOptions, int samDesired, HKEYByReference phkResult);
 
-	/**
+    /**
 	 * The RegQueryValueEx function retrieves the type and data for a specified
 	 * value name associated with an open registry key.
 	 *
@@ -576,24 +572,17 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved,
-			IntByReference lpType, char[] lpData, IntByReference lpcbData);
+    int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved, IntByReference lpType, char[] lpData, IntByReference lpcbData);
 
-	int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved,
-			IntByReference lpType, byte[] lpData, IntByReference lpcbData);
+    int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved, IntByReference lpType, byte[] lpData, IntByReference lpcbData);
 
-	int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved,
-			IntByReference lpType, IntByReference lpData,
-			IntByReference lpcbData);
+    int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved, IntByReference lpType, IntByReference lpData, IntByReference lpcbData);
 
-	int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved,
-			IntByReference lpType, LongByReference lpData,
-			IntByReference lpcbData);
+    int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved, IntByReference lpType, LongByReference lpData, IntByReference lpcbData);
 
-	int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved,
-			IntByReference lpType, Pointer lpData, IntByReference lpcbData);
+    int RegQueryValueEx(HKEY hKey, String lpValueName, int lpReserved, IntByReference lpType, Pointer lpData, IntByReference lpcbData);
 
-	/**
+    /**
 	 * The RegCloseKey function releases a handle to the specified registry key.
 	 *
 	 * @param hKey
@@ -604,9 +593,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegCloseKey(HKEY hKey);
+    int RegCloseKey(HKEY hKey);
 
-	/**
+    /**
 	 * The RegDeleteValue function removes a named value from the specified
 	 * registry key. Note that value names are not case sensitive.
 	 *
@@ -621,9 +610,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegDeleteValue(HKEY hKey, String lpValueName);
+    int RegDeleteValue(HKEY hKey, String lpValueName);
 
-	/**
+    /**
 	 * The RegSetValueEx function sets the data and type of a specified value
 	 * under a registry key.
 	 *
@@ -652,13 +641,11 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegSetValueEx(HKEY hKey, String lpValueName, int Reserved,
-			int dwType, char[] lpData, int cbData);
+    int RegSetValueEx(HKEY hKey, String lpValueName, int Reserved, int dwType, char[] lpData, int cbData);
 
-	int RegSetValueEx(HKEY hKey, String lpValueName, int Reserved,
-			int dwType, byte[] lpData, int cbData);
+    int RegSetValueEx(HKEY hKey, String lpValueName, int Reserved, int dwType, byte[] lpData, int cbData);
 
-	/**
+    /**
 	 *
 	 * @param hKey registry key
 	 * @param lpSubKey subkey name
@@ -673,12 +660,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegCreateKeyEx(HKEY hKey, String lpSubKey, int Reserved,
-			String lpClass, int dwOptions, int samDesired,
-			SECURITY_ATTRIBUTES lpSecurityAttributes,
-			HKEYByReference phkResult, IntByReference lpdwDisposition);
+    int RegCreateKeyEx(HKEY hKey, String lpSubKey, int Reserved, String lpClass, int dwOptions, int samDesired, SECURITY_ATTRIBUTES lpSecurityAttributes, HKEYByReference phkResult, IntByReference lpdwDisposition);
 
-	/**
+    /**
 	 *
 	 * @param hKey registry key
 	 * @param name key name
@@ -686,9 +670,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegDeleteKey(HKEY hKey, String name);
+    int RegDeleteKey(HKEY hKey, String name);
 
-	/**
+    /**
 	 * The RegEnumKeyEx function enumerates subkeys of the specified open
 	 * registry key. The function retrieves information about one subkey each
 	 * time it is called.
@@ -734,11 +718,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegEnumKeyEx(HKEY hKey, int dwIndex, char[] lpName,
-			IntByReference lpcName, IntByReference reserved, char[] lpClass,
-			IntByReference lpcClass, WinBase.FILETIME lpftLastWriteTime);
+    int RegEnumKeyEx(HKEY hKey, int dwIndex, char[] lpName, IntByReference lpcName, IntByReference reserved, char[] lpClass, IntByReference lpcClass, WinBase.FILETIME lpftLastWriteTime);
 
-	/**
+    /**
 	 * The RegEnumValue function enumerates the values for the specified open
 	 * registry key. The function copies one indexed value name and data block
 	 * for the key each time it is called.
@@ -778,11 +760,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegEnumValue(HKEY hKey, int dwIndex, char[] lpValueName,
-			IntByReference lpcchValueName, IntByReference reserved,
-			IntByReference lpType, byte[] lpData, IntByReference lpcbData);
+    int RegEnumValue(HKEY hKey, int dwIndex, char[] lpValueName, IntByReference lpcchValueName, IntByReference reserved, IntByReference lpType, byte[] lpData, IntByReference lpcbData);
 
-	/**
+    /**
 	 * The RegQueryInfoKey function retrieves information about the specified
 	 * registry key.
 	 *
@@ -832,15 +812,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         the function fails, the return value is a nonzero error code
 	 *         defined in Winerror.h.
 	 */
-	int RegQueryInfoKey(HKEY hKey, char[] lpClass,
-			IntByReference lpcClass, IntByReference lpReserved,
-			IntByReference lpcSubKeys, IntByReference lpcMaxSubKeyLen,
-			IntByReference lpcMaxClassLen, IntByReference lpcValues,
-			IntByReference lpcMaxValueNameLen, IntByReference lpcMaxValueLen,
-			IntByReference lpcbSecurityDescriptor,
-			WinBase.FILETIME lpftLastWriteTime);
+    int RegQueryInfoKey(HKEY hKey, char[] lpClass, IntByReference lpcClass, IntByReference lpReserved, IntByReference lpcSubKeys, IntByReference lpcMaxSubKeyLen, IntByReference lpcMaxClassLen, IntByReference lpcValues, IntByReference lpcMaxValueNameLen, IntByReference lpcMaxValueLen, IntByReference lpcbSecurityDescriptor, WinBase.FILETIME lpftLastWriteTime);
 
-	/**
+    /**
 	 * Retrieves the type and data for the specified registry value.
 	 *
 	 * @param hkey
@@ -971,11 +945,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            receive the value, the function returns ERROR_MORE_DATA.
      * @return status
 	 */
-	int RegGetValue(HKEY hkey, String lpSubKey, String lpValue,
-                               int dwFlags, IntByReference pdwType, byte[] pvData,
-                               IntByReference pcbData);
+    int RegGetValue(HKEY hkey, String lpSubKey, String lpValue, int dwFlags, IntByReference pdwType, byte[] pvData, IntByReference pcbData);
 
-	/**
+    /**
 	 * Retrieves a registered handle to the specified event log.
 	 *
 	 * @param lpUNCServerName
@@ -993,9 +965,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         returns ERROR_ACCESS_DENIED if lpSourceName specifies the
 	 *         Security event log.
 	 */
-	HANDLE RegisterEventSource(String lpUNCServerName, String lpSourceName);
+    HANDLE RegisterEventSource(String lpUNCServerName, String lpSourceName);
 
-	/**
+    /**
 	 * Closes the specified event log.
 	 *
 	 * @param hEventLog
@@ -1005,9 +977,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean DeregisterEventSource(HANDLE hEventLog);
+    boolean DeregisterEventSource(HANDLE hEventLog);
 
-	/**
+    /**
 	 * Opens a handle to the specified event log.
 	 *
 	 * @param lpUNCServerName
@@ -1023,9 +995,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         event log. If the function fails, the return value is NULL. To
 	 *         get extended error information, call GetLastError.
 	 */
-	HANDLE OpenEventLog(String lpUNCServerName, String lpSourceName);
+    HANDLE OpenEventLog(String lpUNCServerName, String lpSourceName);
 
-	/**
+    /**
 	 * Closes the specified event log.
 	 *
 	 * @param hEventLog
@@ -1035,9 +1007,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean CloseEventLog(HANDLE hEventLog);
+    boolean CloseEventLog(HANDLE hEventLog);
 
-	/**
+    /**
 	 * Retrieves the number of records in the specified event log.
 	 *
 	 * @param hEventLog
@@ -1050,9 +1022,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean GetNumberOfEventLogRecords(HANDLE hEventLog, IntByReference NumberOfRecords);
+    boolean GetNumberOfEventLogRecords(HANDLE hEventLog, IntByReference NumberOfRecords);
 
-	/**
+    /**
 	 * Writes an entry at the end of the specified event log.
 	 *
 	 * @param hEventLog
@@ -1095,11 +1067,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         return value is zero. To get extended error information, call
 	 *         GetLastError.
 	 */
-	boolean ReportEvent(HANDLE hEventLog, int wType, int wCategory,
-			int dwEventID, PSID lpUserSid, int wNumStrings, int dwDataSize,
-			String[] lpStrings, Pointer lpRawData);
+    boolean ReportEvent(HANDLE hEventLog, int wType, int wCategory, int dwEventID, PSID lpUserSid, int wNumStrings, int dwDataSize, String[] lpStrings, Pointer lpRawData);
 
-	/**
+    /**
 	 * Clears the specified event log, and optionally saves the current copy of
 	 * the log to a backup file.
 	 *
@@ -1115,9 +1085,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         information, call GetLastError. The ClearEventLog function can
 	 *         fail if the event log is empty or the backup file already exists.
 	 */
-	boolean ClearEventLog(HANDLE hEventLog, String lpBackupFileName);
+    boolean ClearEventLog(HANDLE hEventLog, String lpBackupFileName);
 
-	/**
+    /**
 	 * Saves the specified event log to a backup file. The function does not
 	 * clear the event log.
 	 *
@@ -1130,9 +1100,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean BackupEventLog(HANDLE hEventLog, String lpBackupFileName);
+    boolean BackupEventLog(HANDLE hEventLog, String lpBackupFileName);
 
-	/**
+    /**
 	 * Opens a handle to a backup event log created by the BackupEventLog
 	 * function.
 	 *
@@ -1146,9 +1116,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         backup event log. If the function fails, the return value is
 	 *         NULL. To get extended error information, call GetLastError.
 	 */
-	HANDLE OpenBackupEventLog(String lpUNCServerName, String lpFileName);
+    HANDLE OpenBackupEventLog(String lpUNCServerName, String lpFileName);
 
-	/**
+    /**
 	 * Reads the specified number of entries from the specified event log. The
 	 * function can be used to read log entries in chronological or reverse
 	 * chronological order.
@@ -1184,11 +1154,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean ReadEventLog(HANDLE hEventLog, int dwReadFlags,
-			int dwRecordOffset, Pointer lpBuffer, int nNumberOfBytesToRead,
-			IntByReference pnBytesRead, IntByReference pnMinNumberOfBytesNeeded);
+    boolean ReadEventLog(HANDLE hEventLog, int dwReadFlags, int dwRecordOffset, Pointer lpBuffer, int nNumberOfBytesToRead, IntByReference pnBytesRead, IntByReference pnMinNumberOfBytesNeeded);
 
-	/**
+    /**
 	 * The GetOldestEventLogRecord function retrieves the absolute record number
 	 * of the oldest record in the specified event log.
 	 *
@@ -1202,9 +1170,61 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean GetOldestEventLogRecord(HANDLE hEventLog, IntByReference OldestRecord);
+    boolean GetOldestEventLogRecord(HANDLE hEventLog, IntByReference OldestRecord);
 
-	/**
+    /**
+     * Changes the optional configuration parameters of a service.
+     *
+     * @param hService
+     *            A handle to the service. This handle is returned by the
+     *            OpenService or CreateService function and must have the
+     *            SERVICE_CHANGE_CONFIG access right. For more information,
+     *            see <a
+     *            href="http://msdn.microsoft.com/en-us/library/ms685981.aspx"
+     *            >Service Security and Access Rights</a>.
+     *            If the service controller handles the SC_ACTION_RESTART
+     *            action, hService must have the SERVICE_START access right.
+     * @param dwInfoLevel
+     *            The configuration information to be changed.
+     * @param lpInfo
+     *            A pointer to the new value to be set for the configuration
+     *            information. The format of this data depends on the value
+     *            of the dwInfoLevel parameter. If this value is NULL, the
+     *            information remains unchanged.
+     * @return If the function succeeds, the return value is nonzero.
+     *         If the function fails, the return value is zero. To get extended
+     *         error information, call GetLastError.
+     */
+    public boolean ChangeServiceConfig2(SC_HANDLE hService, int dwInfoLevel, ChangeServiceConfig2Info lpInfo);
+
+    /**
+     * Retrieves the optional configuration parameters of the specified service.
+     * 
+     * @param hService
+     *            A handle to the service. This handle is returned by the OpenService or 
+     *            CreateService function and must have the SERVICE_QUERY_CONFIG access right. For 
+     *            more information, see Service Security and Access Rights.
+     * @param dwInfoLevel
+     *            The configuration information to be queried.
+     * @param lpBuffer
+     *            A pointer to the buffer that receives the service configuration information. The 
+     *            format of this data depends on the value of the dwInfoLevel parameter.
+     *            The maximum size of this array is 8K bytes. To determine the required size, 
+     *            specify NULL for this parameter and 0 for the cbBufSize parameter. The function 
+     *            fails and GetLastError returns ERROR_INSUFFICIENT_BUFFER. The pcbBytesNeeded 
+     *            parameter receives the needed size.
+     * @param cbBufSize
+     *            The size of the structure pointed to by the lpBuffer parameter, in bytes.
+     * @param pcbBytesNeeded
+     *            A pointer to a variable that receives the number of bytes required to store the 
+     *            configuration information, if the function fails with ERROR_INSUFFICIENT_BUFFER.
+     * @return If the function succeeds, the return value is nonzero.
+     *         If the function fails, the return value is zero. To get extended error information, 
+     *         call GetLastError.
+     */
+    public boolean QueryServiceConfig2(SC_HANDLE hService, int dwInfoLevel, Pointer lpBuffer, int cbBufSize, IntByReference pcbBytesNeeded);
+
+    /**
 	 * Retrieves the current status of the specified service based on the
 	 * specified information level.
 	 *
@@ -1241,11 +1261,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         information, call GetLastError. This value is a nonzero error
 	 *         code defined in Winerror.h.
 	 */
-	boolean QueryServiceStatusEx(SC_HANDLE hService, int InfoLevel,
-			SERVICE_STATUS_PROCESS lpBuffer, int cbBufSize,
-			IntByReference pcbBytesNeeded);
+    boolean QueryServiceStatusEx(SC_HANDLE hService, int InfoLevel, SERVICE_STATUS_PROCESS lpBuffer, int cbBufSize, IntByReference pcbBytesNeeded);
 
-	/**
+    /**
 	 * Sends a control code to a service. To specify additional information when
 	 * stopping a service, use the ControlServiceEx function.
 	 *
@@ -1280,9 +1298,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         information, call GetLastError. This value is a nonzero error
 	 *         code defined in Winerror.h.
 	 */
-	boolean ControlService(SC_HANDLE hService, int dwControl, SERVICE_STATUS lpServiceStatus);
+    boolean ControlService(SC_HANDLE hService, int dwControl, SERVICE_STATUS lpServiceStatus);
 
-	/**
+    /**
 	 * Starts a service.
 	 *
 	 * @param hService
@@ -1308,9 +1326,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         information, call GetLastError. This value is a nonzero error
 	 *         code defined in Winerror.h.
 	 */
-	boolean StartService(SC_HANDLE hService, int dwNumServiceArgs, String[] lpServiceArgVectors);
+    boolean StartService(SC_HANDLE hService, int dwNumServiceArgs, String[] lpServiceArgVectors);
 
-	/**
+    /**
 	 * Closes a handle to a service control manager or service object.
 	 *
 	 * @param hSCObject
@@ -1325,9 +1343,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         information, call GetLastError. This value is a nonzero error
 	 *         code defined in Winerror.h.
 	 */
-	boolean CloseServiceHandle(SC_HANDLE hSCObject);
+    boolean CloseServiceHandle(SC_HANDLE hSCObject);
 
-	/**
+    /**
 	 * Opens an existing service.
 	 *
 	 * @param hSCManager
@@ -1356,9 +1374,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         extended error information, call GetLastError. This value is a
 	 *         nonzero error code defined in Winerror.h.
 	 */
-	SC_HANDLE OpenService(SC_HANDLE hSCManager, String lpServiceName, int dwDesiredAccess);
+    SC_HANDLE OpenService(SC_HANDLE hSCManager, String lpServiceName, int dwDesiredAccess);
 
-	/**
+    /**
 	 * Establishes a connection to the service control manager on the specified
 	 * computer and opens the specified service control manager database.
 	 *
@@ -1387,9 +1405,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         information, call GetLastError. This value is a nonzero error
 	 *         code defined in Winerror.h.
 	 */
-	SC_HANDLE OpenSCManager(String lpMachineName, String lpDatabaseName, int dwDesiredAccess);
+    SC_HANDLE OpenSCManager(String lpMachineName, String lpDatabaseName, int dwDesiredAccess);
 
-	/**
+    /**
 	 * Creates a new process and its primary thread. The new process runs in the
 	 * security context of the user represented by the specified token.
 	 *
@@ -1447,14 +1465,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean CreateProcessAsUser(HANDLE hToken, String lpApplicationName,
-			String lpCommandLine, SECURITY_ATTRIBUTES lpProcessAttributes,
-			SECURITY_ATTRIBUTES lpThreadAttributes, boolean bInheritHandles,
-			int dwCreationFlags, String lpEnvironment,
-			String lpCurrentDirectory, WinBase.STARTUPINFO lpStartupInfo,
-			WinBase.PROCESS_INFORMATION lpProcessInformation);
+    boolean CreateProcessAsUser(HANDLE hToken, String lpApplicationName, String lpCommandLine, SECURITY_ATTRIBUTES lpProcessAttributes, SECURITY_ATTRIBUTES lpThreadAttributes, boolean bInheritHandles, int dwCreationFlags, String lpEnvironment, String lpCurrentDirectory, WinBase.STARTUPINFO lpStartupInfo, WinBase.PROCESS_INFORMATION lpProcessInformation);
 
-	/**
+    /**
 	 * The AdjustTokenPrivileges function enables or disables privileges in the
 	 * specified access token. Enabling or disabling privileges in an access
 	 * token requires TOKEN_ADJUST_PRIVILEGES access.
@@ -1484,12 +1497,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean AdjustTokenPrivileges(HANDLE TokenHandle,
-			boolean DisableAllPrivileges, WinNT.TOKEN_PRIVILEGES NewState,
-			int BufferLength, WinNT.TOKEN_PRIVILEGES PreviousState,
-			IntByReference ReturnLength);
+    boolean AdjustTokenPrivileges(HANDLE TokenHandle, boolean DisableAllPrivileges, WinNT.TOKEN_PRIVILEGES NewState, int BufferLength, WinNT.TOKEN_PRIVILEGES PreviousState, IntByReference ReturnLength);
 
-	/**
+    /**
 	 * The LookupPrivilegeName function retrieves the name that corresponds to
 	 * the privilege represented on a specific system by a specified locally
 	 * unique identifier (LUID).
@@ -1513,10 +1523,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean LookupPrivilegeName(String lpSystemName, WinNT.LUID lpLuid,
-			char[] lpName, IntByReference cchName);
+    boolean LookupPrivilegeName(String lpSystemName, WinNT.LUID lpLuid, char[] lpName, IntByReference cchName);
 
-	/**
+    /**
 	 * The LookupPrivilegeValue function retrieves the locally unique identifier
 	 * (LUID) used on a specified system to locally represent the specified
 	 * privilege name.
@@ -1540,9 +1549,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         function fails, the return value is zero. To get extended error
 	 *         information, call GetLastError.
 	 */
-	boolean LookupPrivilegeValue(String lpSystemName, String lpName, WinNT.LUID lpLuid);
+    boolean LookupPrivilegeValue(String lpSystemName, String lpName, WinNT.LUID lpLuid);
 
-	/**
+    /**
 	 * The function obtains specified information about the security of a file
 	 * or directory. The information obtained is constrained by the caller's
 	 * access rights and privileges.
@@ -1571,11 +1580,10 @@ public interface Advapi32 extends StdCallLibrary {
 	 *            otherwise, none of the descriptor is returned.
 	 * @return whether the call succeeded
 	 */
-	boolean GetFileSecurity(String lpFileName,
-			int RequestedInformation, Pointer pointer, int nLength,
-			IntByReference lpnLengthNeeded);
+    boolean GetFileSecurity(String lpFileName, int RequestedInformation, Pointer pointer, int nLength, IntByReference lpnLengthNeeded);
 
-	/**
+    /** @deprecated Use the String version */
+    /**
 	 * The GetNamedSecurityInfo function retrieves a copy of the security
 	 * descriptor for an object specified by name
 	 *
@@ -1633,17 +1641,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 * privilege must be enabled for the calling process. For information about the
 	 * security implications of enabling privileges, see Running with Special Privileges.
 	 */
-	int GetNamedSecurityInfo(
-			String pObjectName,
-			int ObjectType,
-			int SecurityInfo,
-			PointerByReference ppsidOwner,
-			PointerByReference ppsidGroup,
-			PointerByReference ppDacl,
-			PointerByReference ppSacl,
-			PointerByReference ppSecurityDescriptor);
+    int GetNamedSecurityInfo(String pObjectName, int ObjectType, int SecurityInfo, PointerByReference ppsidOwner, PointerByReference ppsidGroup, PointerByReference ppDacl, PointerByReference ppSacl, PointerByReference ppSecurityDescriptor);
 
-	/**
+    /**
 	 * The SetNamedSecurityInfo function sets specified security information in
 	 * the security descriptor of a specified object. The caller identifies the
 	 * object by name.
@@ -1703,16 +1703,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 * \\Test\TestFolder, the original inherited ACE is removed and the full volume path
 	 * is not included.
 	 */
-	int SetNamedSecurityInfo(
-			String pObjectName,
-			int ObjectType,
-			int SecurityInfo,
-			Pointer ppsidOwner,
-			Pointer ppsidGroup,
-			Pointer ppDacl,
-			Pointer ppSacl);
+    int SetNamedSecurityInfo(String pObjectName, int ObjectType, int SecurityInfo, Pointer ppsidOwner, Pointer ppsidGroup, Pointer ppDacl, Pointer ppSacl);
 
-	/**
+    /**
 	 * The GetSecurityDescriptorLength function returns the length, in bytes, of a structurally
 	 * valid security descriptor. The length includes the length of all associated structures.
 	 *
@@ -1722,18 +1715,18 @@ public interface Advapi32 extends StdCallLibrary {
 	 * @return If the function succeeds, the function returns the length, in bytes, of the SECURITY_DESCRIPTOR structure.
      *         If the SECURITY_DESCRIPTOR structure is not valid, the return value is undefined.
 	 */
-	int GetSecurityDescriptorLength(Pointer ppSecurityDescriptor);
+    int GetSecurityDescriptorLength(Pointer ppSecurityDescriptor);
 
-	/**
+    /**
 	 * The IsValidSecurityDescriptor function determines whether the components of a security descriptor are valid.
 	 *
 	 * @param ppSecurityDescriptor [in]
      *            A pointer to a SECURITY_DESCRIPTOR structure that the function validates.
 	 * @return If the components of the security descriptor are valid, the return value is nonzero.
 	 */
-	boolean IsValidSecurityDescriptor(Pointer ppSecurityDescriptor);
+    boolean IsValidSecurityDescriptor(Pointer ppSecurityDescriptor);
 
-	/**
+    /**
 	 * The IsValidAcl function validates an access control list (ACL).
 	 *
 	 * @param pAcl [in]
@@ -1745,7 +1738,7 @@ public interface Advapi32 extends StdCallLibrary {
 	 * (ACEs) specified in the AceCount member of the ACL structure fits the space specified by the AclSize member
 	 * of the ACL structure.If pAcl is NULL, the application will fail with an access violation.
 	 */
-	boolean IsValidAcl(Pointer pAcl);
+    boolean IsValidAcl(Pointer pAcl);
 
     /**
      * Applies the given mapping of generic access rights to the given access mask.
@@ -1753,7 +1746,6 @@ public interface Advapi32 extends StdCallLibrary {
      * @param GenericMapping [in] A pointer to a GENERIC_MAPPING structure specifying a mapping of generic access types to specific and standard access types.
      */
     void MapGenericMask(DWORDByReference AccessMask, GENERIC_MAPPING GenericMapping);
-
 
     /**
      * Check if the if the security descriptor grants access to the given client token.
@@ -1769,14 +1761,9 @@ public interface Advapi32 extends StdCallLibrary {
      * @param AccessStatus [out] A pointer to a variable that receives the results of the access check. If the security descriptor allows the requested access rights to the client identified by the access token, AccessStatus is set to TRUE. Otherwise, AccessStatus is set to FALSE, and you can call GetLastError to get extended error information.
      * @return true on success; false on failure (use GetLastError to get extended error information)
      */
-    boolean AccessCheck(Pointer pSecurityDescriptor,
-                               HANDLE ClientToken, DWORD DesiredAccess,
-                               GENERIC_MAPPING GenericMapping,
-                               PRIVILEGE_SET PrivilegeSet,
-                               DWORDByReference PrivilegeSetLength,
-                               DWORDByReference GrantedAccess, BOOLByReference AccessStatus);
+    boolean AccessCheck(Pointer pSecurityDescriptor, HANDLE ClientToken, DWORD DesiredAccess, GENERIC_MAPPING GenericMapping, PRIVILEGE_SET PrivilegeSet, DWORDByReference PrivilegeSetLength, DWORDByReference GrantedAccess, BOOLByReference AccessStatus);
 
-	/**
+    /**
 	 * Encrypts a file or directory. All data streams in a file are encrypted. All
 	 * new files created in an encrypted directory are encrypted.
 	 *
@@ -1786,9 +1773,10 @@ public interface Advapi32 extends StdCallLibrary {
 	 * function fails, the return value is zero. To get extended error
 	 * information, call GetLastError.
 	 */
-	boolean EncryptFile(String lpFileName);
+    boolean EncryptFile(String lpFileName);
 
-	/**
+    /** @deprecated Use the String version */
+    /**
 	 * Decrypts an encrypted file or directory.
 	 *
 	 * @param lpFileName
@@ -1799,9 +1787,10 @@ public interface Advapi32 extends StdCallLibrary {
 	 * function fails, the return value is zero. To get extended error
 	 * information, call GetLastError.
 	 */
-	boolean DecryptFile(String lpFileName, DWORD dwReserved);
+    boolean DecryptFile(String lpFileName, DWORD dwReserved);
 
-	/**
+    /** @deprecated Use the String version */
+    /**
 	 * Retrieves the encryption status of the specified file.
 	 *
 	 * @param lpFileName
@@ -1813,9 +1802,10 @@ public interface Advapi32 extends StdCallLibrary {
 	 * function fails, the return value is zero. To get extended error
 	 * information, call GetLastError.
 	 */
-	boolean FileEncryptionStatus(String lpFileName, DWORDByReference lpStatus);
+    boolean FileEncryptionStatus(String lpFileName, DWORDByReference lpStatus);
 
-	/**
+    /** @deprecated Use the String version */
+    /**
 	 * Disables or enables encryption of the specified directory and the files in
 	 * it. It does not affect encryption of subdirectories below the indicated
 	 * directory.
@@ -1830,9 +1820,10 @@ public interface Advapi32 extends StdCallLibrary {
 	 * function fails, the return value is zero. To get extended error
 	 * information, call GetLastError.
 	 */
-	boolean EncryptionDisable(String DirPath, boolean Disable);
+    boolean EncryptionDisable(String DirPath, boolean Disable);
 
-	/**
+    /** @deprecated Use the String version */
+    /**
 	 * Opens an encrypted file in order to backup (export) or restore (import) the
 	 * file. This is one of a group of Encrypted File System (EFS) functions that
 	 * is intended to implement backup and restore functionality, while
@@ -1852,9 +1843,10 @@ public interface Advapi32 extends StdCallLibrary {
 	 * FormatMessage with the FORMAT_MESSAGE_FROM_SYSTEM flag to get a generic
 	 * text description of the error.
 	 */
-	int OpenEncryptedFileRaw(String lpFileName, ULONG ulFlags, PointerByReference pvContext);
+    int OpenEncryptedFileRaw(String lpFileName, ULONG ulFlags, PointerByReference pvContext);
 
-	/**
+    /** @deprecated Use the String version */
+    /**
 	 * Backs up (export) encrypted files. This is one of a group of Encrypted File
 	 * System (EFS) functions that is intended to implement backup and restore
 	 * functionality, while maintaining files in their encrypted state.
@@ -1879,10 +1871,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 * can use FormatMessage with the FORMAT_MESSAGE_FROM_SYSTEM flag to get a
 	 * generic text description of the error.
 	 */
-	int ReadEncryptedFileRaw(FE_EXPORT_FUNC pfExportCallback,
-                                  Pointer pvCallbackContext, Pointer pvContext);
+    int ReadEncryptedFileRaw(FE_EXPORT_FUNC pfExportCallback, Pointer pvCallbackContext, Pointer pvContext);
 
-	/**
+    /**
 	 * Restores (import) encrypted files. This is one of a group of Encrypted File
 	 * System (EFS) functions that is intended to implement backup and restore
 	 * functionality, while maintaining files in.
@@ -1909,10 +1900,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 * can use FormatMessage with the FORMAT_MESSAGE_FROM_SYSTEM flag to get a
 	 * generic text description of the error.
 	 */
-	int WriteEncryptedFileRaw(FE_IMPORT_FUNC pfImportCallback,
-                                   Pointer pvCallbackContext, Pointer pvContext);
+    int WriteEncryptedFileRaw(FE_IMPORT_FUNC pfImportCallback, Pointer pvCallbackContext, Pointer pvContext);
 
-	/**
+    /**
 	 * Closes an encrypted file after a backup or restore operation, and frees
 	 * associated system resources. This is one of a group of Encrypted File
 	 * System (EFS) functions that is intended to implement backup and restore
@@ -1922,9 +1912,9 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         A pointer to a system-defined context block. The
 	 *         OpenEncryptedFileRaw function returns the context block.
 	 */
-	void CloseEncryptedFileRaw(Pointer pvContext);
+    void CloseEncryptedFileRaw(Pointer pvContext);
 
-	/**
+    /**
 	 * <code>
 	        BOOL WINAPI CreateProcessWithLogonW(
 	          _In_         LPCWSTR lpUsername,
@@ -2226,8 +2216,5 @@ public interface Advapi32 extends StdCallLibrary {
 	 *         GetExitCodeProcess.
 	 * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms682431%28v=vs.85%29.aspx">MSDN</a>
 	 */
-	boolean CreateProcessWithLogonW(String lpUsername, String lpDomain, String lpPassword, int dwLogonFlags,
-			String lpApplicationName, String lpCommandLine, int dwCreationFlags, Pointer lpEnvironment,
-			String lpCurrentDirectory, STARTUPINFO lpStartupInfo, PROCESS_INFORMATION lpProcessInfo);
-
+    boolean CreateProcessWithLogonW(String lpUsername, String lpDomain, String lpPassword, int dwLogonFlags, String lpApplicationName, String lpCommandLine, int dwCreationFlags, Pointer lpEnvironment, String lpCurrentDirectory, STARTUPINFO lpStartupInfo, PROCESS_INFORMATION lpProcessInfo);
 }
